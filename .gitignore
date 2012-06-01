@@ -1,6 +1,13 @@
-*.class
+# Eclipse files
+.classpath
+.project
+.settings
 
-# Package Files #
+#Maven stuff
+target/
+
+# Generic java stuff
+*.class
 *.jar
 *.war
 *.ear
