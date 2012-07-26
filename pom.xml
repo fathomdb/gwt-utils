@@ -41,6 +41,7 @@
 			<groupId>com.google.javascript</groupId>
 			<artifactId>closure-compiler</artifactId>
 			<version>${closureVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
