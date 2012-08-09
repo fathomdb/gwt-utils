@@ -1,5 +1,11 @@
 package com.fathomdb.gwt.utils.resources;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import com.fathomdb.gwt.utils.rg.JavascriptResourceGenerator;
 import com.google.gwt.resources.client.ResourcePrototype;
 import com.google.gwt.resources.ext.ResourceGeneratorType;
@@ -18,5 +24,12 @@ public interface JavascriptResource extends ResourcePrototype {
 	 * Provides the contents of the JavascriptResource.
 	 */
 	String getText();
+
+	@Documented
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public @interface Minification {
+		boolean minify() default true;
+	}
 
 }

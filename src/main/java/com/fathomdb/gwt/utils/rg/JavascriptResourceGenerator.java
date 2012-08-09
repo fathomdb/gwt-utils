@@ -7,6 +7,7 @@ import org.apache.tools.ant.filters.StringInputStream;
 
 import com.fathomdb.gwt.utils.resources.JavascriptInjector;
 import com.fathomdb.gwt.utils.resources.JavascriptResource;
+import com.fathomdb.gwt.utils.resources.JavascriptResource.Minification;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
@@ -49,9 +50,11 @@ public class JavascriptResourceGenerator extends AbstractResourceGenerator {
 		// Convenience when examining the generated code.
 		sw.println("// " + resource.toExternalForm());
 
+		Minification minification = method.getAnnotation(JavascriptResource.Minification.class);
+
 		// Methods defined by JavascriptResource interface
 		writeEnsureInjected(sw);
-		writeGetText(sw, resource);
+		writeGetText(minification, sw, resource);
 		writeGetName(sw, method);
 
 		sw.outdent();
@@ -74,13 +77,14 @@ public class JavascriptResourceGenerator extends AbstractResourceGenerator {
 		sw.println("}");
 	}
 
-	private void writeGetText(SourceWriter sw, URL resource) throws UnableToCompleteException {
+	private void writeGetText(Minification minification, SourceWriter sw, URL resource)
+			throws UnableToCompleteException {
 		sw.println("public String getText() {");
 		sw.indent();
 
 		String toWrite = Util.readURLAsString(resource);
 
-		toWrite = maybeMinify(resource.toExternalForm(), toWrite);
+		toWrite = maybeMinify(minification, resource.toExternalForm(), toWrite);
 
 		if (toWrite.length() > MAX_STRING_CHUNK) {
 			writeLongString(sw, toWrite);
@@ -91,27 +95,37 @@ public class JavascriptResourceGenerator extends AbstractResourceGenerator {
 		sw.println("}");
 	}
 
-	private String maybeMinify(String fileName, String js) {
+	private String maybeMinify(Minification minification, String fileName, String js) {
 		// TODO: Error handling
 		// TODO: Don't bother if it's small anyway??
 		// TODO: Use heuristics to check if already minified (look for comments or whitespace?)
 		// TODO: Skip in hosted mode?
 		// TODO: Make external?
 		// TODO: When external, bundle? (Like images?)
-		Compiler compiler = new Compiler();
-		JSSourceFile input;
-		try {
-			input = JSSourceFile.fromInputStream(fileName, new StringInputStream(js));
-		} catch (IOException e) {
-			throw new IllegalStateException();
-		}
-		JSSourceFile[] externs = new JSSourceFile[0];
-		JSSourceFile[] inputs = { input };
-		CompilerOptions options = new CompilerOptions();
-		CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
-		/* Result result = */compiler.compile(externs, inputs, options);
 
-		return compiler.toSource();
+		boolean minify = true;
+		if (minification != null) {
+			minify = minification.minify();
+		}
+
+		if (minify) {
+			Compiler compiler = new Compiler();
+			JSSourceFile input;
+			try {
+				input = JSSourceFile.fromInputStream(fileName, new StringInputStream(js));
+			} catch (IOException e) {
+				throw new IllegalStateException();
+			}
+			JSSourceFile[] externs = new JSSourceFile[0];
+			JSSourceFile[] inputs = { input };
+			CompilerOptions options = new CompilerOptions();
+			CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
+			/* Result result = */compiler.compile(externs, inputs, options);
+
+			return compiler.toSource();
+		} else {
+			return js;
+		}
 	}
 
 	private void writeGetName(SourceWriter sw, JMethod method) throws UnableToCompleteException {
