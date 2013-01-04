@@ -12,7 +12,7 @@
 	<name>GWT Utilities</name>
 
 	<properties>
-		<gwtVersion>2.5.0-rc1</gwtVersion>
+		<gwtVersion>2.5.0</gwtVersion>
 		<closureVersion>r1918</closureVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
-			<version>12.0-rc2</version>
+			<version>13.0.1</version>
 		</dependency>
 
 		<!-- For Javascript resource generation -->
